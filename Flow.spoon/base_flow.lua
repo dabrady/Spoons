@@ -1,11 +1,15 @@
-local Workflow = {name = 'Abstract Base Flow'}
-local CURRENT_WORKFLOW = nil
+local Universe = ...
+local BaseFlow = {name = 'Abstract Base Flow'}
 
-function Workflow.current()
-  return CURRENT_WORKFLOW
-end
-
-local function setActionPalette(state, this, actionList)
+-- 'actionList' is a table in the format of:
+-- {
+--   {
+--     name = 'a string',
+--     command = function() ... end
+--   },
+--   ...
+-- }
+local function _setActionPalette(state, this, actionList)
   if actionList == nil then return false end
 
   -- Clear any existing palette
@@ -17,27 +21,27 @@ local function setActionPalette(state, this, actionList)
     local actionId = i -- Very simple, let's see how it works.
     state.actionMap[actionId] = action.command
     table.insert(state.actionPalette, {
-      text = action.name,-- newFlow.name..': '..action.name,
+      text = action.name,
       id = actionId
     })
   end
 
-  return true
+  return this
 end
 
-local function showActionPalette(state, _)
-  if not state or state.actionPalette == nil then return false end
+local function _showActionPalette(state, this)
+  if not state or #state.actionPalette == 0 then return false end
 
   local palette = hs.chooser.new(function(action)
-    if action then
-      state.actionMap[action.id]()
-    end
-  end)
-  :choices(state.actionPalette)
-  :rows(#state.actionPalette)
-  :show()
+      if action then
+        state.actionMap[action.id]()
+      end
+    end)
+    :choices(state.actionPalette)
+    :rows(#state.actionPalette)
+    :show()
 
-  return true
+  return this
 
   -------- This bit of logic dynamically updates the size of the chooser based on the
   -------- choice list, but relies on a workaround for forcing the chooser to resize
@@ -75,60 +79,44 @@ local function showActionPalette(state, _)
   -- return true
 end
 
-local function enter(_, this)
+local function _enter(_, this)
   -- No need to do anything if already in this flow.
-  if CURRENT_WORKFLOW == this then return this end
-
+  if Universe.currentFlow() == this then return this end
   hs.alert("Entering "..this.name)
-  if CURRENT_WORKFLOW then CURRENT_WORKFLOW:exit() end
-  CURRENT_WORKFLOW = this
+
+  if Universe.currentFlow() then Universe.currentFlow():exit() end
+  Universe.setCurrentFlow(this)
+
   return this
 end
 
-local function exit(_, this)
+local function _exit(_, this)
   hs.alert("Exiting "..this.name)
-  CURRENT_WORKFLOW = nil
+
+  Universe.setCurrentFlow(nil)
+
   return this
 end
 
--- local function bindHotkeys(_, this, mapping)
---   local spec = {
---     enter = hs.fnutils.partial(enter, _, this),
---     exit = hs.fnutils.partial(exit, _, this)
---   }
---   -- TODO THIS DELETES PREVIOUS HOTKEY MAPPINGS: FIGURE OUT HOW TO NOT DO THAT
---   hs.spoons.bindHotkeysToSpec(spec, mapping)
---   return this
--- end
+function BaseFlow.new(name)
+  -- Create a new flow object and state table to close over.
+  local newFlow
+  local state = setmetatable({}, {__index = newFlow}) -- Link to new flow
 
-function Workflow.new(name)
-  -- Create a new workflow object and state table to close over.
-  local newFlow = setmetatable({}, {__index = Workflow}) -- Link to base Workflow
-  local state = setmetatable({}, {__index = newFlow}) -- Link to new workflow
+  state.actionPalette = {}
+  state.actionMap = {}
 
-  -- 'actionList' is a table in the format of:
-  -- {
-  --   {
-  --     name = 'a string',
-  --     command = function() ... end
-  --   },
-  --   ...
-  -- }
-
-
-  -----
   newFlow = {
     name = name,
-    enter = hs.fnutils.partial(enter, state),
-    exit = hs.fnutils.partial(exit, state),
-    -- bindHotkeys = hs.fnutils.partial(bindHotkeys, state),
-    setActionPalette = hs.fnutils.partial(setActionPalette, state),
-    showActionPalette = hs.fnutils.partial(showActionPalette, state),
+    enter = hs.fnutils.partial(_enter, state),
+    exit = hs.fnutils.partial(_exit, state),
+    setActionPalette = hs.fnutils.partial(_setActionPalette, state),
+    showActionPalette = hs.fnutils.partial(_showActionPalette, state),
     --- Expose internal state for debugging purposes
     -- __state__ = state
   }
-  return newFlow
+  return setmetatable(newFlow, {__index = BaseFlow}) -- Link to BaseFlow
 end
 
 --------
-return Workflow
+return BaseFlow
