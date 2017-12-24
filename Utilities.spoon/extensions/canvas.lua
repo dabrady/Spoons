@@ -1,8 +1,8 @@
-require('hs.canvas')
+local canvas_ext = {}
 
 ---- Rolling my own 'show and hide with fade-out': need to be able to cancel the animation.
-hs.canvas.flashable = {}
-function hs.canvas.flashable.new(canvas, options)
+canvas_ext.flashable = {}
+function canvas_ext.flashable.new(canvas, options)
   options = options or {}
   local _fade -- Forward declaration for closure
   local fader = hs.timer.delayed.new(options.fadeSpeed or 0.07, function() _fade() end)
@@ -51,4 +51,8 @@ function hs.canvas.flashable.new(canvas, options)
   }
 end
 
-setmetatable(hs.canvas.flashable, {__call = function(_, ...) return hs.canvas.flashable.new(...) end})
+setmetatable(canvas_ext.flashable, {__call = function(_, ...) return canvas_ext.flashable.new(...) end})
+
+-----
+
+return canvas_ext

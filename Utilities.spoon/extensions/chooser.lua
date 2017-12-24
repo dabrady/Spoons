@@ -1,8 +1,8 @@
-require('hs.chooser')
+local chooser_ext = {}
 
 -- Takes a list of strings and creates a choice table formatted such that
 -- it is acceptable by hs.chooser:choices
-function hs.chooser.generateChoiceTable(list)
+function chooser_ext.generateChoiceTable(list)
   if list == nil or #list == 0 then
     return {}
   end
@@ -14,3 +14,7 @@ function hs.chooser.generateChoiceTable(list)
 
   return choiceTable
 end
+
+------
+
+return chooser_ext

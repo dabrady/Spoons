@@ -1,7 +1,7 @@
-fs = require('hs.fs')
+local fs_ext = {}
 
 -- Returns a list of directories in the given path.
-function fs.dirs(path)
+function fs_ext.dirs(path)
   local _,directoryContents = hs.fs.dir(path)
   local directories = {}
   repeat
@@ -19,3 +19,7 @@ function fs.dirs(path)
 
   return directories
 end
+
+------
+
+return fs_ext

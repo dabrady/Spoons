@@ -11,7 +11,12 @@ local utilities = {
   end)()
 }
 
-function utilities:init()
+function utilities:init(namespace)
+  if namespace == nil then
+    self.utils = {}
+    namespace = self.utils
+  end
+  
   local extensionRoot = self.spoonPath..'extensions/'
   local _,extensionData = hs.fs.dir(extensionRoot)
 
@@ -22,7 +27,7 @@ function utilities:init()
       local basename = filename:match("^(.+)%.") -- Matches everything up to the first '.'
       print('\t-- loading '..basename..' extension')
 
-      dofile(extensionRoot..filename)
+      namespace[basename] = dofile(extensionRoot..filename)
     end
   until filename == nil
 

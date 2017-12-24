@@ -1,5 +1,7 @@
+local table_ext = {}
+
 -- Handy (shallow) table print function
-function table.print(t)
+function table_ext.print(t)
   if type(t) ~= 'table' then return nil end
 
   for k,v in pairs(t) do
@@ -8,7 +10,7 @@ function table.print(t)
 end
 
 -- Returns a list of the keys of the given table.
-function table.keys(t)
+function table_ext.keys(t)
   if type(t) ~= 'table' then return nil end
 
   local keys = {}
@@ -49,13 +51,13 @@ end
 
 -- 2. The easy solution.
 
-function table.copy(obj)
+function table_ext.copy(obj)
   if type(obj) ~= 'table' then return obj end
 
   -- Preserve metatables.
   local res = setmetatable({}, getmetatable(obj))
 
-  for k, v in pairs(obj) do res[table.copy(k)] = table.copy(v) end
+  for k, v in pairs(obj) do res[table_ext.copy(k)] = table_ext.copy(v) end
   return res
 end
 
@@ -81,7 +83,7 @@ end
 -- handle this by tracking which tables it has already
 -- started to copy.
 
-function table.deepCopy(obj, seen)
+function table_ext.deepCopy(obj, seen)
   -- Handle non-tables and previously-seen tables.
   if type(obj) ~= 'table' then return obj end
   if seen and seen[obj] then return seen[obj] end
@@ -90,12 +92,16 @@ function table.deepCopy(obj, seen)
   local s = seen or {}
   local res = setmetatable({}, getmetatable(obj))
   s[obj] = res
-  for k, v in pairs(obj) do res[table.deepCopy(k, s)] = table.deepCopy(v, s) end
+  for k, v in pairs(obj) do res[table_ext.deepCopy(k, s)] = table_ext.deepCopy(v, s) end
   return res
 end
 
 -- Simple utility for mergint two tables.
-function table.merge(t1, t2)
+function table_ext.merge(t1, t2)
   for k,v in pairs(t2) do t1[k] = v end
   return t1
 end
+
+----------
+
+return table_ext

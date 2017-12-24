@@ -1,7 +1,6 @@
-require('hs.task')
-local hsa = require('hs.application')
+local application_ext = {}
 
-function hsa.tell(application, message)
+function application_ext.tell(application, message)
   if message == nil then return nil end
   if application == nil then return nil end
 
@@ -25,7 +24,7 @@ function hsa.tell(application, message)
   if type(application) == 'string' then
     -- print('Converting app string')
 
-    local app = hsa.get(application)
+    local app = hs.application.get(application)
     if app == nil then
       -- print("App not running: attempting to start it in the background")
 
@@ -34,7 +33,7 @@ function hsa.tell(application, message)
           local t0 = os.clock()
           while os.clock() - t0 <= n do end
         end
-        app = hsa.get(application)
+        app = hs.application.get(application)
         sleep(1)
         -- print('Opened! Commanding application to do things')
         _tellMessage(app)
@@ -50,3 +49,7 @@ function hsa.tell(application, message)
     end
   end
 end
+
+--------
+
+return application_ext
