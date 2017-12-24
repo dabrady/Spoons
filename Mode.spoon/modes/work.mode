@@ -1,10 +1,10 @@
-local Universe, Mode, Flow = ... -- Expect our globals to be passed in while loading this file.
+local Universe, BaseMode, Flow = ... -- Expect our globals to be passed in while loading this file.
 
 local flows = {
   Flow:availableFlows()['Development']
 }
 
-local work = Mode.new('Work',flows,{
+local work = BaseMode.new('Work', flows, {
   start = function(flows)
     hs.alert('Get to work!')
   end,
@@ -12,15 +12,5 @@ local work = Mode.new('Work',flows,{
     hs.alert('Chillax, man')
   end,
 })
-
-local function _toggleWorkMode()
-  if Universe.currentMode() == work then
-    work:exit()
-  else
-    work:enter()
-  end
-end
-
-hs.hotkey.bind({'cmd', 'shift'}, '`', _toggleWorkMode)
 
 return work

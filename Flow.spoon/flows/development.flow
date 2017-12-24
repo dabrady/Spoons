@@ -5,7 +5,7 @@ return BaseFlow.new('Development')
       name = 'Open project',
       command = function()
         local tapjoyProjectRoot = '~/github/tapjoy/'
-        local tapjoyProjects = hs.chooser.generateChoiceTable(hs.fs.dirs(tapjoyProjectRoot))
+        local tapjoyProjects = my.chooser.generateChoiceTable(hs.fs.dirs(tapjoyProjectRoot))
         hs.chooser.new(
           function(project)
             if project ~= nil then

@@ -42,7 +42,9 @@ end
 
 function Mode:init()
   -- Load some base utilities
-  hs.loadSpoon('Utilities')
+  if not spoon['Utilities'] then
+    my = hs.loadSpoon('Utilities').utils
+  end
   -- Load our flow system
   local Flow = hs.loadSpoon('Flow'):bindHotkeys({showFlowPalette = {{'ctrl', 'alt', 'cmd'}, 'space'}})
   -- Load base mode

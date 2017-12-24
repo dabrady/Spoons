@@ -82,7 +82,7 @@ end
 local function _enter(_, this)
   -- No need to do anything if already in this flow.
   if Universe.currentFlow() == this then return this end
-  hs.alert("Entering "..this.name)
+  hs.alert(this.name.." flow activated")
 
   if Universe.currentFlow() then Universe.currentFlow():exit() end
   Universe.setCurrentFlow(this)
@@ -91,7 +91,7 @@ local function _enter(_, this)
 end
 
 local function _exit(_, this)
-  hs.alert("Exiting "..this.name)
+  hs.alert("Exiting "..this.name.." flow")
 
   Universe.setCurrentFlow(nil)
 

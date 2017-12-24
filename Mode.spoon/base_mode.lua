@@ -23,7 +23,7 @@ end
 
 local function _enter(state, startFn, this)
   if Universe.currentMode() == this then return this end
-  logger.d("Entering "..this.name.." mode")
+  logger.d(this.name.." mode activated")
 
   if Universe.currentMode() then Universe.currentMode():exit() end
   Universe.setCurrentMode(this)
