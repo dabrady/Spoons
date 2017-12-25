@@ -20,11 +20,6 @@ function Spacious:bindHotkeys(mapping)
 end
 
 function Spacious:init()
-  -- Load some base utilities
-  if not spoon['Utilities'] then
-    my = hs.loadSpoon('Utilities').utils
-  end
-
   return self
 end
 
