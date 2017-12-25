@@ -1,4 +1,4 @@
-local utilities = {
+local Utilities = {
   name = 'Utilities',
   version = '0.0.1',
   author = 'Daniel Brady <daniel.13rady@gmail.com>',
@@ -11,12 +11,12 @@ local utilities = {
   end)()
 }
 
-function utilities:init(namespace)
+function Utilities:init(namespace)
   if namespace == nil then
     self.utils = {}
     namespace = self.utils
   end
-  
+
   local extensionRoot = self.spoonPath..'extensions/'
   local _,extensionData = hs.fs.dir(extensionRoot)
 
@@ -34,4 +34,4 @@ function utilities:init(namespace)
   return self
 end
 
-return utilities
+return Utilities
