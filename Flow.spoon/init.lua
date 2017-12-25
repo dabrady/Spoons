@@ -33,10 +33,6 @@ function Flow:availableFlows()
 end
 
 function Flow:init()
-  -- Load some base utilities
-  if not spoon['Utilities'] then
-    my = hs.loadSpoon('Utilities').utils
-  end
   -- Load base flow
   local BaseWorkflow = assert(loadfile(self.spoonPath..'base_flow.lua'))(self)
 

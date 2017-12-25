@@ -1,11 +1,13 @@
 local BaseFlow = ... -- Expect our base object to be passed in while loading this file.
+local generateChoiceTable = require('extensions.chooser').generateChoiceTable
+
 return BaseFlow.new('Development')
   :setActionPalette({
     {
       name = 'Open project',
       command = function()
         local tapjoyProjectRoot = '~/github/tapjoy/'
-        local tapjoyProjects = my.chooser.generateChoiceTable(hs.fs.dirs(tapjoyProjectRoot))
+        local tapjoyProjects = generateChoiceTable(hs.fs.dirs(tapjoyProjectRoot))
         hs.chooser.new(
           function(project)
             if project ~= nil then
