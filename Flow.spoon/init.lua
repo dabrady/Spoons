@@ -11,6 +11,20 @@ local Flow = {
   end)()
 }
 
+local function withSpoonInPath(fn)
+  -- Temporarily modify loadpath
+  local oldPath = package.path
+  local oldCPath = package.cpath
+  package.path = string.format('%s?.lua;%s', Flow.spoonPath, oldPath)
+  package.cpath = string.format('%s?.so;%s', Flow.spoonPath, oldCPath)
+
+  fn()
+
+  -- Reset loadpath
+  package.path = oldPath
+  package.cpath = oldCPath
+end
+
 Flow.currentFlow, Flow.setCurrentFlow = (function()
   -- Creating a closure instead of a global to avoid collisions when this spoon
   -- is loaded multiple times.
@@ -33,23 +47,25 @@ function Flow:availableFlows()
 end
 
 function Flow:init()
-  -- Load base flow
-  local BaseWorkflow = assert(loadfile(self.spoonPath..'base_flow.lua'))(self)
+  withSpoonInPath(function()
+    -- Load base flow
+    local BaseWorkflow = assert(loadfile(self.spoonPath..'base_flow.lua'))(self)
 
-  -- Load all flows
-  local flowRoot = self.spoonPath..'flows/'
-  local _,flows = hs.fs.dir(flowRoot)
-  repeat
-    local filename = flows:next()
-    if filename and filename ~= '.' and filename ~= '..' then
-      local basename = filename:match("^(.+)%.") -- Matches everything up to the first '.'
-      print('\t-- loading '..basename..' flow')
+    -- Load all flows
+    local flowRoot = self.spoonPath..'flows/'
+    local _,flows = hs.fs.dir(flowRoot)
+    repeat
+      local filename = flows:next()
+      if filename and filename ~= '.' and filename ~= '..' then
+        local basename = filename:match("^(.+)%.") -- Matches everything up to the first '.'
+        print('\t-- loading '..basename..' flow')
 
-      -- Load the flow, passing the base workflow as a parameter to the Lua chunk.
-      local flow = assert(loadfile(flowRoot..filename))(BaseWorkflow)
-      availableFlows[flow.name] = flow
-    end
-  until filename == nil
+        -- Load the flow, passing the base workflow as a parameter to the Lua chunk.
+        local flow = assert(loadfile(flowRoot..filename))(BaseWorkflow)
+        availableFlows[flow.name] = flow
+      end
+    until filename == nil
+  end)
 
   return self
 end
