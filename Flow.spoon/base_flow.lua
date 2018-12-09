@@ -47,41 +47,6 @@ local function _showActionPalette(state, this)
     :show()
 
   return this
-
-  -------- This bit of logic dynamically updates the size of the chooser based on the
-  -------- choice list, but relies on a workaround for forcing the chooser to resize
-  -------- while visible which had the annoying side-effect of selecting each character
-  -------- you typed into the text field, making search strings longer than a single
-  -------- character unusable :P
-  -- local function _filterChoices(query)
-  --   -- Return full palette of choices if query is empty.
-  --   if query == '' then return state.actionPalette end
-  --
-  --   -- Perform case-insensitive matchers by converty query and match candidate to all lowercase.
-  --   query = query:lower()
-  --   local filteredChoices = {}
-  --   for _, choice in ipairs(state.actionPalette) do
-  --     local text = choice.text
-  --     if text and text:lower():find(query) then table.insert(filteredChoices, choice) end
-  --   end
-  --   return filteredChoices
-  -- end
-  --
-  -- local function _updateChooser(queryString)
-  --   print('updating!')
-  --   local newChoiceList = _filterChoices(queryString)
-  --   palette:rows(#newChoiceList)
-  --   :choices(newChoiceList)
-  --   :queryChangedCallback(function(queryString)
-  --     print('skipping!')
-  --     palette:queryChangedCallback(_updateChooser)
-  --   end) -- Remove the existing callback so we don't go into an infinite loop on the next line
-  --   :show():query(queryString) -- Force window to redraw itself
-  --   -- :queryChangedCallback(_updateChooser) -- Register this callback with the chooser again
-  -- end
-
-  -- palette:queryChangedCallback(_updateChooser):show()
-  -- return true
 end
 
 local function _enter(_, this)
