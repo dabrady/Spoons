@@ -12,39 +12,43 @@ local BaseFlow = {name = 'Abstract Base Flow'}
 local function _setActionPalette(state, this, actionList)
   if actionList == nil then return false end
 
-  -- Clear any existing palette
-  state.actionPalette = {}
-  state.actionMap = {}
-
   -- Build a new palette
+  local actionMap = {}
+  local actionPalette = {}
   for i,action in ipairs(actionList) do
     local actionId = i -- Very simple, let's see how it works.
-    state.actionMap[actionId] = action.command
-    table.insert(state.actionPalette, {
-      text = action.name,
-      id = actionId
+    actionMap[actionId] = action.command
+    table.insert(actionPalette, {
+      id = actionId,
+      text = action.name
     })
   end
 
   -- Insert an 'exit' action
-  local exitId = #state.actionPalette + 1
-  state.actionPalette[exitId] = { id = exitId, text = '(Exit '..this.name..')'}
-  state.actionMap[exitId] = hs.fnutils.partial(this.exit, this)
+  local exitId = #actionPalette + 1
+  actionPalette[exitId] = { id = exitId, text = '(Exit '..this.name..')'}
+  actionMap[exitId] = hs.fnutils.partial(this.exit, this)
+
+  -- Create a chooser for this flow's action palette
+  state.actionChooser = hs.chooser.new(
+    -- Invoke the chosen action
+    function(action)
+      if action then
+        actionMap[action.id]()
+      end
+    end)
+    -- Set the choices
+    :choices(actionPalette)
+    -- Size the chooser according to the number of choices (up to the default max)
+    :rows(#actionPalette)
 
   return this
 end
 
 local function _showActionPalette(state, this)
-  if not state or #state.actionPalette == 0 then return false end
+  if not (state and state.actionChooser) then return false end
 
-  local palette = hs.chooser.new(function(action)
-      if action then
-        state.actionMap[action.id]()
-      end
-    end)
-    :choices(state.actionPalette)
-    :rows(#state.actionPalette)
-    :show()
+  state.actionChooser:show()
 
   return this
 end
@@ -72,9 +76,6 @@ function BaseFlow.new(name)
   -- Create a new flow object and state table to close over.
   local newFlow
   local state = setmetatable({}, {__index = newFlow}) -- Link to new flow
-
-  state.actionPalette = {}
-  state.actionMap = {}
 
   newFlow = {
     name = name,
