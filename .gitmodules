@@ -1,3 +1,6 @@
 [submodule "Mode.spoon/lib/lua-utils"]
 	path = Mode.spoon/lib/lua-utils
 	url = https://github.com/dabrady/lua-utils
+[submodule "Flow.spoon/lib/lua-utils"]
+	path = Flow.spoon/lib/lua-utils
+	url = https://github.com/dabrady/lua-utils
