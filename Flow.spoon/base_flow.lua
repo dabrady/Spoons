@@ -26,6 +26,11 @@ local function _setActionPalette(state, this, actionList)
     })
   end
 
+  -- Insert an 'exit' action
+  local exitId = #state.actionPalette + 1
+  state.actionPalette[exitId] = { id = exitId, text = '(Exit '..this.name..')'}
+  state.actionMap[exitId] = hs.fnutils.partial(this.exit, this)
+
   return this
 end
 
