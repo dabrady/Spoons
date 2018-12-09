@@ -25,6 +25,31 @@ local function withSpoonInPath(fn)
   package.cpath = oldCPath
 end
 
+local function showFlowPalette()
+  local my = { table = require('lib/lua-utils/table') }
+
+  if Flow:currentFlow() then
+    Flow:currentFlow():showActionPalette()
+  else
+    local choices = my.table.map(
+      my.table.keys(Flow:availableFlows()),
+      function(i, flowName)
+        return i, { text = flowName }
+    end)
+
+    hs.chooser.new(function(action)
+        if action then
+          Flow:availableFlows()[action.text]:enter():showActionPalette()
+        end
+    end)
+      :choices(choices)
+      :rows(#choices)
+      :show()
+  end
+
+  return
+end
+
 Flow.currentFlow, Flow.setCurrentFlow = (function()
   -- Creating a closure instead of a global to avoid collisions when this spoon
   -- is loaded multiple times.
@@ -75,14 +100,7 @@ function Flow:stop() return self end
 
 function Flow:bindHotkeys(mapping)
   local spec = {
-    showFlowPalette = function()
-      if self:currentFlow() then
-        return self:currentFlow():showActionPalette()
-      else
-        hs.alert('No flow!')
-        return false
-      end
-    end
+    showFlowPalette = showFlowPalette
   }
   hs.spoons.bindHotkeysToSpec(spec, mapping)
   return self
