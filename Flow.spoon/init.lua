@@ -37,9 +37,11 @@ local function showFlowPalette()
         return i, { text = flowName }
     end)
 
-    hs.chooser.new(function(action)
+    Flow._createChooser('flows', function(action)
         if action then
-          Flow:availableFlows()[action.text]:enter():showActionPalette()
+          hs.timer.doAfter(0, function()
+            Flow:availableFlows()[action.text]:enter():showActionPalette()
+          end)
         end
     end)
       :choices(choices)
@@ -71,7 +73,30 @@ function Flow:availableFlows()
   return availableFlows
 end
 
+Flow._registeredChoosers = {}
+function Flow._createChooser(id, ...)
+  local chooser = hs.chooser.new(...)
+  getmetatable(chooser).__flow_id = id
+  Flow._registeredChoosers[id] = chooser
+  return chooser
+end
+
 function Flow:init()
+
+  hs.chooser.globalCallback = (function()
+      local oldDefaultChooserCallback = hs.chooser.globalCallback
+      return function(chooser, state)
+        if chooser.__flow_id and state == 'didClose' then
+          hs.timer.doAfter(0.3, function()
+                             oldDefaultChooserCallback(chooser, state)
+          end)
+        else
+          oldDefaultChooserCallback(chooser, state)
+        end
+      end
+    end
+  )()
+
   withSpoonInPath(function()
     -- Load base flow
     local BaseWorkflow = assert(loadfile(self.spoonPath..'base_flow.lua'))(self)

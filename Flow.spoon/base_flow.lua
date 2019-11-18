@@ -1,6 +1,14 @@
 local Universe = ...
 local BaseFlow = {name = 'Abstract Base Flow'}
 
+BaseFlow.createChooser =(function()
+    local count = 0;
+    return function(fn)
+      count = count + 1
+      return Universe._createChooser(count, fn)
+    end
+end)()
+
 -- 'actionList' is a table in the format of:
 -- {
 --   {
@@ -30,10 +38,11 @@ local function _setActionPalette(state, this, actionList)
   actionMap[exitId] = hs.fnutils.partial(this.exit, this)
 
   -- Create a chooser for this flow's action palette
-  state.actionChooser = hs.chooser.new(
+  state.actionChooser = BaseFlow.createChooser(
     -- Invoke the chosen action
     function(action)
       if action then
+        -- hs.timer.doAfter(0, actionMap[action.id])
         actionMap[action.id]()
       end
     end)
