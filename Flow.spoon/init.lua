@@ -11,6 +11,13 @@ local Flow = {
   end)()
 }
 
+-- For type-checking
+__checks__ = require('checks')
+local function typecheck(val, t)
+  __checks__(t)
+  return val
+end
+
 local function withSpoonInPath(fn)
   -- Temporarily modify loadpath
   local oldPath = package.path
@@ -128,6 +135,18 @@ function Flow:bindHotkeys(mapping)
     showFlowPalette = showFlowPalette
   }
   hs.spoons.bindHotkeysToSpec(spec, mapping)
+  return self
+end
+
+function Flow:configure(desiredConfig)
+  __checks__('?', 'table') -- since this is an "instance method", first arg is the implicit 'self', so gotta skip it
+
+  -- Configure keymap
+  hotkeys = typecheck(desiredConfig.hotkeys, '?table')
+  if hotkeys then
+    self:bindHotkeys(desiredConfig.hotkeys)
+  end
+
   return self
 end
 ----
