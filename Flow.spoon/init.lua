@@ -82,20 +82,20 @@ function Flow._createChooser(id, ...)
 end
 
 function Flow:init()
-
-  hs.chooser.globalCallback = (function()
-      local oldDefaultChooserCallback = hs.chooser.globalCallback
-      return function(chooser, state)
-        if chooser.__flow_id and state == 'didClose' then
-          hs.timer.doAfter(0.3, function()
-                             oldDefaultChooserCallback(chooser, state)
-          end)
-        else
-          oldDefaultChooserCallback(chooser, state)
-        end
-      end
-    end
-  )()
+  -- TODO(dabrady) Figure out why I decided this delay was necessary.
+  -- hs.chooser.globalCallback = (function()
+  --     local oldDefaultChooserCallback = hs.chooser.globalCallback
+  --     return function(chooser, state)
+  --       if chooser.__flow_id and state == 'didClose' then
+  --         hs.timer.doAfter(0.3, function()
+  --                            oldDefaultChooserCallback(chooser, state)
+  --         end)
+  --       else
+  --         oldDefaultChooserCallback(chooser, state)
+  --       end
+  --     end
+  --   end
+  -- )()
 
   withSpoonInPath(function()
     -- Load base flow
