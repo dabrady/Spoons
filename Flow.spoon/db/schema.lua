@@ -1,6 +1,7 @@
-print('[DEBUG] loading schema')
-ActiveRecord = require('LUActiveRecord')
-ActiveRecord.setDefaultDatabase(os.getenv('FLOW_DB'))
+local ActiveRecord = ...
+local START_OVER = true
+-- print('[DEBUG] loading schema')
+-----
 
 -- TODO(dabrady) Consider something like this
 -- local Type = {
@@ -35,7 +36,8 @@ Token = ActiveRecord{
   tableName = 'tokens',
   schema = {
     keyset = 'TEXT NOT NULL'
-  }
+  },
+  recreate = START_OVER
 }
 
 --[[
@@ -57,7 +59,8 @@ AppContext = ActiveRecord{
     hidden = 'BOOLEAN DEFAULT false CHECK(hidden in (false, true))'--[[..' NOT NULL']],
     visible_windows = 'TEXT',
     focused_window = 'TEXT'
-  }
+  },
+  recreate = START_OVER
 }
 
 Action = ActiveRecord{
@@ -71,7 +74,7 @@ Action = ActiveRecord{
   references = {
     app_context_id = AppContext.tableName
   },
-  recreate = true
+  recreate = START_OVER
 }
 
 AppWindow = ActiveRecord{
@@ -84,7 +87,8 @@ AppWindow = ActiveRecord{
     visible = 'BOOLEAN DEFAULT false CHECK(visible in (false,true))'--[[..' NOT NULL']],
     minimized = 'BOOLEAN DEFAULT false CHECK(minimized in (false,true))'--[[..' NOT NULL']],
     standard = 'BOOLEAN DEFAULT false CHECK(standard in (false,true))'--[[..' NOT NULL']],
-  }
+  },
+  recreate = START_OVER
 }
 
 Moment = ActiveRecord{
@@ -103,5 +107,8 @@ Moment = ActiveRecord{
     app_context_id = AppContext.tableName,
     previous_moment_id = 'moments',
     last_action_id = Action.tableName
-  }
+  },
+  recreate = START_OVER
 }
+
+return true

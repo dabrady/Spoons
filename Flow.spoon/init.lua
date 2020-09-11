@@ -129,7 +129,18 @@ function Flow:init()
   return self
 end
 
-function Flow:start() return self end
+function Flow:start()
+  -- NOTE(dabrady) Deferring database initialization until the last possible moment,
+  -- mostly because it requires some config and the `init` method of a Spoon does not
+  -- accept arguments by convention.
+  withSpoonInPath(function()
+    -- Initialize the Flow database
+    assert(loadfile(self.spoonPath..'/db/init.lua'))(self)
+  end)
+
+  ---
+  return self
+end
 function Flow:stop() return self end
 
 function Flow:bindHotkeys(mapping)
@@ -151,6 +162,9 @@ function Flow:configure(desiredConfig)
   if not self.__config then
     self.__config = {}
   end
+
+  -- Configure database
+  self.__config.databasePath = typecheck(desiredConfig.databasePath, 'string') -- required
 
   -- Configure keymap
   hotkeys = typecheck(desiredConfig.hotkeys, '?table')
