@@ -104,6 +104,7 @@ function Flow:init()
   --   end
   -- )()
 
+  -- Load all the things
   withSpoonInPath(function()
     -- Load base flow
     local BaseWorkflow = assert(loadfile(self.spoonPath..'base_flow.lua'))(self)
@@ -124,6 +125,7 @@ function Flow:init()
     until filename == nil
   end)
 
+  ---
   return self
 end
 
@@ -135,16 +137,26 @@ function Flow:bindHotkeys(mapping)
     showFlowPalette = showFlowPalette
   }
   hs.spoons.bindHotkeysToSpec(spec, mapping)
+
+  ---
   return self
 end
 
 function Flow:configure(desiredConfig)
+  if not desiredConfig then
+    return self
+  end
   __checks__('?', 'table') -- since this is an "instance method", first arg is the implicit 'self', so gotta skip it
+
+  if not self.__config then
+    self.__config = {}
+  end
 
   -- Configure keymap
   hotkeys = typecheck(desiredConfig.hotkeys, '?table')
   if hotkeys then
     self:bindHotkeys(desiredConfig.hotkeys)
+    self.__config.hotkeys = hotkeys
   end
 
   return self
