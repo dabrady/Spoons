@@ -1,21 +1,21 @@
 local BaseFlow = ... -- Expect our base object to be passed in while loading this file.
-local generateChoiceTable = require('lib/lua-utils/hammerspoon/chooser').generateChoiceTable
+local generate_choice_table = require('lib/lua-utils/hammerspoon/chooser').generateChoiceTable
 
 return BaseFlow.new('Development')
-  :setActionPalette({
+  :set_action_palette({
     {
       name = 'Open project',
       command = function()
-        local tapjoyProjectRoot = '~/github/tapjoy/'
-        local tapjoyProjects = generateChoiceTable(hs.fs.dirs(tapjoyProjectRoot))
-        BaseFlow.createChooser(
+        local tapjoy_project_root = '~/github/tapjoy/'
+        local tapjoy_projects = generate_choice_table(hs.fs.dirs(tapjoy_project_root))
+        BaseFlow.create_chooser(
           function(project)
             if project ~= nil then
-              local projectPath = tapjoyProjectRoot..project.text
-              hs.execute('atom '..projectPath, true)
+              local project_path = tapjoy_project_root..project.text
+              hs.execute('atom '..project_path, true)
             end
           end
-        ):choices(tapjoyProjects):show()
+        ):choices(tapjoy_projects):show()
       end
     }
   })

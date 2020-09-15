@@ -1,15 +1,15 @@
 local Universe = ...
 local BaseFlow = {name = 'Abstract Base Flow'}
 
-BaseFlow.createChooser =(function()
+BaseFlow.create_chooser =(function()
     local count = 0;
     return function(fn)
       count = count + 1
-      return Universe._createChooser(count, fn)
+      return Universe._create_chooser(count, fn)
     end
 end)()
 
--- 'actionList' is a table in the format of:
+-- 'action_list' is a table in the format of:
 -- {
 --   {
 --     name = 'a string',
@@ -17,58 +17,58 @@ end)()
 --   },
 --   ...
 -- }
-local function _setActionPalette(state, this, actionList)
-  if actionList == nil then return false end
+local function _set_action_palette(state, this, action_list)
+  if action_list == nil then return false end
 
   -- Build a new palette
-  local actionMap = {}
-  local actionPalette = {}
-  for i,action in ipairs(actionList) do
-    local actionId = i -- Very simple, let's see how it works.
-    actionMap[actionId] = action.command
-    table.insert(actionPalette, {
-      id = actionId,
+  local action_map = {}
+  local action_palette = {}
+  for i,action in ipairs(action_list) do
+    local action_id = i -- Very simple, let's see how it works.
+    action_map[action_id] = action.command
+    table.insert(action_palette, {
+      id = action_id,
       text = action.name
     })
   end
 
   -- Insert an 'exit' action
-  local exitId = #actionPalette + 1
-  actionPalette[exitId] = { id = exitId, text = '(Exit '..this.name..')'}
-  actionMap[exitId] = hs.fnutils.partial(this.exit, this)
+  local exit_id = #action_palette + 1
+  action_palette[exit_id] = { id = exit_id, text = '(Exit '..this.name..')'}
+  action_map[exit_id] = hs.fnutils.partial(this.exit, this)
 
   -- Create a chooser for this flow's action palette
-  state.actionChooser = BaseFlow.createChooser(
+  state.action_chooser = BaseFlow.create_chooser(
     -- Invoke the chosen action
     function(action)
       if action then
-        -- hs.timer.doAfter(0, actionMap[action.id])
-        actionMap[action.id]()
+        -- hs.timer.doAfter(0, action_map[action.id])
+        action_map[action.id]()
       end
     end)
     -- Set the choices
-    :choices(actionPalette)
+    :choices(action_palette)
     -- Size the chooser according to the number of choices (up to the default max)
-    :rows(#actionPalette)
+    :rows(#action_palette)
 
   return this
 end
 
-local function _showActionPalette(state, this)
-  if not (state and state.actionChooser) then return false end
+local function _show_action_palette(state, this)
+  if not (state and state.action_chooser) then return false end
 
-  state.actionChooser:show()
+  state.action_chooser:show()
 
   return this
 end
 
 local function _enter(_, this)
   -- No need to do anything if already in this flow.
-  if Universe.currentFlow() == this then return this end
+  if Universe.current_flow() == this then return this end
   -- hs.alert(this.name.." flow activated")
 
-  if Universe.currentFlow() then Universe.currentFlow():exit() end
-  Universe.setCurrentFlow(this)
+  if Universe.current_flow() then Universe.current_flow():exit() end
+  Universe.set_current_flow(this)
 
   return this
 end
@@ -76,26 +76,26 @@ end
 local function _exit(_, this)
   -- hs.alert("Exiting "..this.name.." flow")
 
-  Universe.setCurrentFlow(nil)
+  Universe.set_current_flow(nil)
 
   return this
 end
 
 function BaseFlow.new(name)
   -- Create a new flow object and state table to close over.
-  local newFlow
-  local state = setmetatable({}, {__index = newFlow}) -- Link to new flow
+  local new_flow
+  local state = setmetatable({}, {__index = new_flow}) -- Link to new flow
 
-  newFlow = {
+  new_flow = {
     name = name,
     enter = hs.fnutils.partial(_enter, state),
     exit = hs.fnutils.partial(_exit, state),
-    setActionPalette = hs.fnutils.partial(_setActionPalette, state),
-    showActionPalette = hs.fnutils.partial(_showActionPalette, state),
+    set_action_palette = hs.fnutils.partial(_set_action_palette, state),
+    show_action_palette = hs.fnutils.partial(_show_action_palette, state),
     --- Expose internal state for debugging purposes
     -- __state__ = state
   }
-  return setmetatable(newFlow, {__index = BaseFlow}) -- Link to BaseFlow
+  return setmetatable(new_flow, {__index = BaseFlow}) -- Link to BaseFlow
 end
 
 --------

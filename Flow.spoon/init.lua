@@ -5,7 +5,7 @@ local Flow = {
   license = 'https://opensource.org/licenses/MIT',
 
   -- Absolute path to root of spoon
-  spoonPath = (function()
+  spoon_path = (function()
     local str = debug.getinfo(2, "S").source:sub(2)
     return str:match("(.*/)")
   end)()
@@ -18,36 +18,36 @@ local function typecheck(val, t)
   return val
 end
 
-local function withSpoonInPath(fn)
+local function with_spoon_in_path(fn)
   -- Temporarily modify loadpath
-  local oldPath = package.path
-  local oldCPath = package.cpath
-  package.path = string.format('%s?.lua;%s', Flow.spoonPath, oldPath)
-  package.cpath = string.format('%s?.so;%s', Flow.spoonPath, oldCPath)
+  local old_path = package.path
+  local old_cpath = package.cpath
+  package.path = string.format('%s?.lua;%s', Flow.spoon_path, old_path)
+  package.cpath = string.format('%s?.so;%s', Flow.spoon_path, old_cpath)
 
   fn()
 
   -- Reset loadpath
-  package.path = oldPath
-  package.cpath = oldCPath
+  package.path = old_path
+  package.cpath = old_cpath
 end
 
-local function showFlowPalette()
+local function show_flow_palette()
   local my = { table = require('lib/lua-utils/table') }
 
-  if Flow:currentFlow() then
-    Flow:currentFlow():showActionPalette()
+  if Flow:current_flow() then
+    Flow:current_flow():show_action_palette()
   else
     local choices = my.table.map(
-      my.table.keys(Flow:availableFlows()),
-      function(i, flowName)
-        return i, { text = flowName }
+      my.table.keys(Flow:available_flows()),
+      function(i, flow_name)
+        return i, { text = flow_name }
     end)
 
-    Flow._createChooser('flows', function(action)
+    Flow._create_chooser('flows', function(action)
         if action then
           hs.timer.doAfter(0, function()
-            Flow:availableFlows()[action.text]:enter():showActionPalette()
+            Flow:available_flows()[action.text]:enter():show_action_palette()
           end)
         end
     end)
@@ -59,7 +59,7 @@ local function showFlowPalette()
   return
 end
 
-Flow.currentFlow, Flow.setCurrentFlow = (function()
+Flow.current_flow, Flow.set_current_flow = (function()
   -- Creating a closure instead of a global to avoid collisions when this spoon
   -- is loaded multiple times.
   local CURRENT_FLOW = nil
@@ -75,16 +75,16 @@ Flow.currentFlow, Flow.setCurrentFlow = (function()
     end
 end)()
 
-local availableFlows = {}
-function Flow:availableFlows()
-  return availableFlows
+local available_flows = {}
+function Flow:available_flows()
+  return available_flows
 end
 
-Flow._registeredChoosers = {}
-function Flow._createChooser(id, ...)
+Flow._registered_choosers = {}
+function Flow._create_chooser(id, ...)
   local chooser = hs.chooser.new(...)
   getmetatable(chooser).__flow_id = id
-  Flow._registeredChoosers[id] = chooser
+  Flow._registered_choosers[id] = chooser
   return chooser
 end
 
@@ -105,13 +105,13 @@ function Flow:init()
   -- )()
 
   -- Load all the things
-  withSpoonInPath(function()
+  with_spoon_in_path(function()
     -- Load base flow
-    local BaseWorkflow = assert(loadfile(self.spoonPath..'base_flow.lua'))(self)
+    local BaseWorkflow = assert(loadfile(self.spoon_path..'base_flow.lua'))(self)
 
     -- Load all flows
-    local flowRoot = self.spoonPath..'flows/'
-    local _,flows = hs.fs.dir(flowRoot)
+    local flow_root = self.spoon_path..'flows/'
+    local _,flows = hs.fs.dir(flow_root)
     repeat
       local filename = flows:next()
       if filename and filename ~= '.' and filename ~= '..' then
@@ -119,8 +119,8 @@ function Flow:init()
         print('\t-- loading '..basename..' flow')
 
         -- Load the flow, passing the base workflow as a parameter to the Lua chunk.
-        local flow = assert(loadfile(flowRoot..filename))(BaseWorkflow)
-        availableFlows[flow.name] = flow
+        local flow = assert(loadfile(flow_root..filename))(BaseWorkflow)
+        available_flows[flow.name] = flow
       end
     until filename == nil
   end)
@@ -133,9 +133,9 @@ function Flow:start()
   -- NOTE(dabrady) Deferring database initialization until the last possible moment,
   -- mostly because it requires some config and the `init` method of a Spoon does not
   -- accept arguments by convention.
-  withSpoonInPath(function()
+  with_spoon_in_path(function()
     -- Initialize the Flow database
-    assert(loadfile(self.spoonPath..'db/init.lua'))(self)
+    assert(loadfile(self.spoon_path..'db/init.lua'))(self)
   end)
 
   ---
@@ -143,9 +143,9 @@ function Flow:start()
 end
 function Flow:stop() return self end
 
-function Flow:bindHotkeys(mapping)
+function Flow:bind_hotkeys(mapping)
   local spec = {
-    showFlowPalette = showFlowPalette
+    show_flow_palette = show_flow_palette
   }
   hs.spoons.bindHotkeysToSpec(spec, mapping)
 
@@ -153,8 +153,8 @@ function Flow:bindHotkeys(mapping)
   return self
 end
 
-function Flow:configure(desiredConfig)
-  if not desiredConfig then
+function Flow:configure(desired_config)
+  if not desired_config then
     return self
   end
   __checks__('?', 'table') -- since this is an "instance method", first arg is the implicit 'self', so gotta skip it
@@ -164,12 +164,12 @@ function Flow:configure(desiredConfig)
   end
 
   -- Configure database
-  self.__config.databasePath = typecheck(desiredConfig.databasePath, 'string') -- required
+  self.__config.database_location = typecheck(desired_config.database_location, 'string') -- required
 
   -- Configure keymap
-  hotkeys = typecheck(desiredConfig.hotkeys, '?table')
+  hotkeys = typecheck(desired_config.hotkeys, '?table')
   if hotkeys then
-    self:bindHotkeys(desiredConfig.hotkeys)
+    self:bind_hotkeys(desired_config.hotkeys)
     self.__config.hotkeys = hotkeys
   end
 
