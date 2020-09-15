@@ -1,28 +1,8 @@
-local ActiveRecord = ...
+local luactiverecord = ...
 local START_OVER = true
 -- print('[DEBUG] loading schema')
+-- print(luactiverecord)
 -----
-
--- TODO(dabrady) Consider something like this
--- local Type = {
---   NULL      = 'NULL',
-
---   BLOB      = 'BLOB',
---   RAWDATA   = 'BLOB',
-
---   INTEGER   = 'INTEGER',
---   REAL      = 'REAL',
---   FLOAT     = 'REAL',
-
---   TEXT      = 'TEXT',
---   DATE      = 'TEXT',
---   TIME      = 'TEXT',
---   TIMESTAMP = 'TEXT',
-
---   BOOLEAN   = function(column) return string.format('INTEGER CHECK(%s in (false, true))', column) end
--- }
-
-
 
 -- TODO(dabrady) Add null constraints when ready to use
 
@@ -32,8 +12,8 @@ local START_OVER = true
   Without some context, however, we cannot say what is meant.
 
 ]]
-Token = ActiveRecord{
-  tableName = 'tokens',
+Token = luactiverecord{
+  table_name = 'tokens',
   schema = {
     keyset = 'TEXT NOT NULL'
   },
@@ -49,8 +29,8 @@ Token = ActiveRecord{
   Token, an AppContext is simply a meaningless snapshot of a running application.
 
 ]]
-AppContext = ActiveRecord{
-  tableName = 'app_contexts',
+AppContext = luactiverecord{
+  table_name = 'app_contexts',
   schema = {
     now = 'TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP',
     bundle_id = 'TEXT'--[[..' NOT NULL']],
@@ -63,8 +43,8 @@ AppContext = ActiveRecord{
   recreate = START_OVER
 }
 
-Action = ActiveRecord{
-  tableName = 'actions',
+Action = luactiverecord{
+  table_name = 'actions',
   schema = {
     short_name = 'TEXT'--[[ ..'NOT NULL' ]],
     token_seq = 'TEXT'--[[ ..'NOT NULL' ]],
@@ -72,13 +52,13 @@ Action = ActiveRecord{
     app_context_id = 'TEXT'
   },
   references = {
-    app_context_id = AppContext.tableName
+    app_context_id = AppContext.table_name
   },
   recreate = START_OVER
 }
 
-AppWindow = ActiveRecord{
-  tableName = 'app_windows',
+AppWindow = luactiverecord{
+  table_name = 'app_windows',
   schema = {
     app_bundle_id = 'TEXT'--[[..' NOT NULL']],
     fullscreen = 'BOOLEAN DEFAULT false CHECK(fullscreen in (false,true))'--[[..' NOT NULL']],
@@ -91,8 +71,8 @@ AppWindow = ActiveRecord{
   recreate = START_OVER
 }
 
-Moment = ActiveRecord{
-  tableName = 'moments',
+Moment = luactiverecord{
+  table_name = 'moments',
   schema = {
     app_context_id = 'TEXT'--[[..' NOT_NULL']],
     open_app_ids = 'TEXT'--[[..' NOT_NULL']],
@@ -104,9 +84,9 @@ Moment = ActiveRecord{
     timestamp = 'TIMESTAMP TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP',
   },
   references = {
-    app_context_id = AppContext.tableName,
+    app_context_id = AppContext.table_name,
     previous_moment_id = 'moments',
-    last_action_id = Action.tableName
+    last_action_id = Action.table_name
   },
   recreate = START_OVER
 }

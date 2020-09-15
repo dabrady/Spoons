@@ -6,8 +6,11 @@ assert(
 )
 ---
 -- NOTE(dabrady) Exposing this globally for testing porpoises; reevaluate that decision later
-ActiveRecord = require('LUActiveRecord')
-ActiveRecord.setDefaultDatabase(Universe.__config.databasePath)
-assert(loadfile(Universe.spoonPath..'/db/schema.lua')(ActiveRecord))
+luactiverecord = require('luactiverecord')
+luactiverecord:configure{
+  database_location = Universe.__config.databasePath,
+  seeds_location = Universe.spoonPath..'db/seeds.lua'
+}
+assert(loadfile(Universe.spoonPath..'db/schema.lua')(luactiverecord))
 
-ActiveRecord.seedDatabase(Universe.spoonPath..'/db/seeds.lua')
+luactiverecord:seed_database()

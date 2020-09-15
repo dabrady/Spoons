@@ -135,7 +135,7 @@ function Flow:start()
   -- accept arguments by convention.
   withSpoonInPath(function()
     -- Initialize the Flow database
-    assert(loadfile(self.spoonPath..'/db/init.lua'))(self)
+    assert(loadfile(self.spoonPath..'db/init.lua'))(self)
   end)
 
   ---
