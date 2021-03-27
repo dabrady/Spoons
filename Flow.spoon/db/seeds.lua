@@ -1,9 +1,9 @@
 local luactiverecord = ...
--- print('[DEBUG] loading seeds')
+local set = require('lua-utils/orderedset')
 return {
   tokens = {
-    { keyset = {"cmd", "c"} },
-    { keyset = {"cmd", "v"} },
-    { keyset = {"cmd", "tab"} },
+    { keyset = set{"cmd", "c"} },
+    { keyset = set{"cmd", "v"} },
+    { keyset = set{"cmd", "tab"} },
   }
 }
