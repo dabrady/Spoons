@@ -214,7 +214,7 @@ function Flow:bind_hotkeys(mapping)
 end
 
 function Flow:configure(desired_config)
-  Flow.__logger.i("configuring")
+  Flow.__logger.d("configuring")
 
   if not desired_config then
     return self
@@ -228,11 +228,19 @@ function Flow:configure(desired_config)
   self.__config.database_location = desired_config.database_location
 
   -- Configure keymap
-  hotkeys = desired_config.hotkeys
+  local hotkeys = desired_config.hotkeys
   if hotkeys then
     self:bind_hotkeys(hotkeys)
     self.__config.hotkeys = hotkeys
   end
+
+  -- Store the path to the flows
+  local flow_root = assert(
+    desired_config.flow_root,
+    "Must configure 'flow_root' to point to your directory of flows"
+  )
+  assert(hs.fs.dir(flow_root))
+  self.__config.flow_root = flow_root
 
   return self
 end
