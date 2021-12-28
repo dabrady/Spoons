@@ -82,6 +82,30 @@ function Flow:available_flows()
   return available_flows
 end
 
+function Flow:__reload_flows()
+  Flow.__logger.d("reloading available flows")
+
+  -- Load all the things
+  local BaseWorkflow = assert(loadfile(hs.spoons.resourcePath('base_flow.lua')))(self)
+  with_spoon_in_path(function()
+      -- Load all flows
+      local flow_root = self.__config.flow_root..'/'
+      local _,flows = hs.fs.dir(flow_root)
+      repeat
+        local filename = flows:next()
+        if filename and filename ~= '.' and filename ~= '..' then
+          local basename = filename:match("^[^%.]*") -- Matches everything up to the first '.'
+          Flow.__logger.i('loading '..basename..' flow')
+
+          -- Load the flow, passing the base workflow as a parameter to the Lua chunk.
+          local flow = assert(loadfile(flow_root..filename))(BaseWorkflow)
+          available_flows[flow.name] = flow
+        end
+      until filename == nil
+      flows:close() -- Necessary to make sure the directory stream is closed
+  end)
+end
+
 Flow._registered_choosers = {}
 function Flow._create_chooser(id, ...)
   Flow.__logger.d("creating new chooser")
@@ -108,30 +132,6 @@ function Flow:init()
   --   end
   -- )()
 
-  -- TODO(dabrady) Should this move to `start`? Reread Spoon conventions.
-
-  -- Load base flow
-  local BaseWorkflow = assert(loadfile(hs.spoons.resourcePath('base_flow.lua')))(self)
-
-  -- Load all the things
-  with_spoon_in_path(function()
-    -- Load all flows
-    local flow_root = self.spoonPath..'flows/'
-    local _,flows = hs.fs.dir(flow_root)
-    repeat
-      local filename = flows:next()
-      if filename and filename ~= '.' and filename ~= '..' then
-        local basename = filename:match("^[^%.]*") -- Matches everything up to the first '.'
-        Flow.__logger.i('loading '..basename..' flow')
-
-        -- Load the flow, passing the base workflow as a parameter to the Lua chunk.
-        local flow = assert(loadfile(flow_root..filename))(BaseWorkflow)
-        available_flows[flow.name] = flow
-      end
-    until filename == nil
-    flows:close() -- Necessary to make sure the directory stream is closed
-  end)
-
   ---
   return self
 end
@@ -143,6 +143,9 @@ function Flow:start()
     Flow.__logger.d("just kidding, already started")
     return self
   end
+
+  -- Load all the things
+  self:__reload_flows()
 
   -- NOTE(dabrady) Deferring database initialization until the last possible moment,
   -- mostly because it requires some config and the `init` method of a Spoon does not
