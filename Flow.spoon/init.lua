@@ -225,7 +225,10 @@ function Flow:configure(desired_config)
   end
 
   -- Configure database
-  self.__config.database_location = desired_config.database_location
+  self.__config.database_location = assert(
+    desired_config.database_location,
+    "Must specify 'database_location' for storing all tracking data"
+  )
 
   -- Configure keymap
   local hotkeys = desired_config.hotkeys
