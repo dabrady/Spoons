@@ -129,6 +129,7 @@ function Flow:init()
         available_flows[flow.name] = flow
       end
     until filename == nil
+    flows:close() -- Necessary to make sure the directory stream is closed
   end)
 
   ---
